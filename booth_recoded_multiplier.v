@@ -32,18 +32,17 @@ module booth_recoded_multiplier(
 	//DFF	
 	reg_N #(12) reg12_00(reset, clk, multiplicand, A);
 	reg_N #(12) reg12_01(reset, clk, multiplier, B);
+	reg_N #(24) reg24_00(reset, clk, {A[11]^B[11],sum[22:0]}, prod);
 	//Binary to 2's complement conversion
 	bin2comp #(12) bin00 (A, A_2comp);
 	bin2comp #(12) bin01 (B, B_2comp);
-    bin2comp #(24) bin02 ({multiplicand[11]^multiplier[11],sumBuf[22:0]}, sum);
+    bin2comp #(24) bin02 ({A[11]^B[11],sumBuf[22:0]},sum);
 	//Booth Encoder for Multiplier	
     boothEnNBits #(12) booth_enc00(B_2comp, enc_op);
 	//Partial Product Generator
     ppGenNBits #(12) pp_gen00( enc_op, A_2comp, pp, cor_bit);
-	//Wallace Tree - Summation of Partial Product
+	//Summation of Partial Product
     ppCompressor_12 pp_comp( pp, cor_bit, out_x, out_y);
 	//Carry Look-ahead Adder
 	cla_24bit cla00(out_x, out_y , 1'b0, sumBuf, cout);
-	//DFF
-	reg_N #(24) reg24_00(reset, clk, {multiplicand[11]^multiplier[11],sum[22:0]}, prod);
 endmodule
